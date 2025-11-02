@@ -58,6 +58,11 @@ export default function Home() {
   };
 
   const saveProgress = (pistaId: number) => {
+    // Verificar se já não foi encontrada antes
+    if (pistasEncontradas.includes(pistaId)) {
+      return; // Já foi encontrada, não adicionar novamente
+    }
+    
     const newProgress = [...pistasEncontradas, pistaId];
     setPistasEncontradas(newProgress);
     localStorage.setItem('pistasEncontradas', JSON.stringify(newProgress));
@@ -79,8 +84,16 @@ export default function Home() {
       const data = await res.json();
 
       if (data.valido) {
-        setMessage({ type: 'success', text: data.mensagem });
-        saveProgress(data.pista.id);
+        // Verificar se já foi encontrada antes
+        if (pistasEncontradas.includes(data.pista.id)) {
+          setMessage({ 
+            type: 'error', 
+            text: `Você já encontrou: ${data.pista.titulo}. Procure os outros locais!` 
+          });
+        } else {
+          setMessage({ type: 'success', text: data.mensagem });
+          saveProgress(data.pista.id);
+        }
         setManualCode('');
       } else {
         setMessage({ type: 'error', text: data.mensagem });
